@@ -1,0 +1,5 @@
+2023-01-21 14:43:20,041 : INFO : __main__::main::line46 : Hello world from main
+2023-01-21 14:43:20,041 : DEBUG : __main__::main::line47 : DEBUG from main
+2023-01-21 14:43:20,041 : INFO : src.sync::hello::line9 : Hello world
+2023-01-21 14:43:20,042 : WARNING : src.sync::hello::line10 : WARNING
+2023-01-21 14:43:20,042 : INFO : __main__::main::line50 : after hello from main
