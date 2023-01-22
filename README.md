@@ -8,11 +8,20 @@ Synchronize two folders: source and replica. Keep a full, identical copy of sour
   - [Contents](#contents)
   - [Requirements](#requirements)
   - [Usage](#usage)
+    - [1. Sync folders once](#1-sync-folders-once)
+    - [2. Sync folders using a while loop](#2-sync-folders-using-a-while-loop)
+    - [3. Sync folders using cronjobs](#3-sync-folders-using-cronjobs)
   - [NOTE](#note)
 
 ## Requirements
 
-Python>=3.9
+```bash
+
+conda create -n myenv python=3.9 -y
+conda activate myenv
+pip install python-crontab
+
+```
 
 ## Usage
 
@@ -31,6 +40,70 @@ optional arguments:
                         Log file path
   --log-level LOG_LEVEL
                         Log level
+```
+
+### 1. Sync folders once
+
+```bash
+python main.py run-once --src /path/to/folder --dst /path/to/new/folder --log-file ./sync.log 
+```
+
+```bash
+usage: main.py run-once [-h] --src SRC --dst DST [--log-path LOG_FILE] [--log-lvl LOG_LEVEL]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --src SRC             Source directory
+  --dst DST             Destination directory
+  --log-path LOG_FILE, --log-file LOG_FILE
+                        Log file path
+  --log-lvl LOG_LEVEL, --log-level LOG_LEVEL
+                        Log level
+  -d, --dry-run         Dry run the syncronization
+```
+
+### 2. Sync folders using a while loop
+
+```bash
+python main.py inf-loop --src /path/to/folder --dst /path/to/new/folder --log-file ./sync.log --interval 3600 
+```
+
+```bash
+usage: main.py inf-loop [-h] --src SRC --dst DST [--log-path LOG_FILE] [--log-lvl LOG_LEVEL] [--interval SYNC_INTERVAL]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --src SRC             Source directory
+  --dst DST             Destination directory
+  --log-path LOG_FILE, --log-file LOG_FILE
+                        Log file path
+  --log-lvl LOG_LEVEL, --log-level LOG_LEVEL
+                        Log level
+  --interval SYNC_INTERVAL, --sync-interval SYNC_INTERVAL
+                        Sync interval in seconds. Defaults to 3600 seconds.
+  -d, --dry-run         Dry run the syncronization
+```
+
+### 3. Sync folders using cronjobs
+
+```bash
+python main.py cronjob --src /path/to/folder --dst /path/to/new/folder --log-file ./sync.log --interval "@hourly" 
+```
+
+```bash
+usage: main.py cronjob [-h] --src SRC --dst DST [--log-path LOG_FILE] [--log-lvl LOG_LEVEL] [--interval SYNC_INTERVAL]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --src SRC             Source directory
+  --dst DST             Destination directory
+  --log-path LOG_FILE, --log-file LOG_FILE
+                        Log file path
+  --log-lvl LOG_LEVEL, --log-level LOG_LEVEL
+                        Log level
+  --interval SYNC_INTERVAL, --sync-interval SYNC_INTERVAL
+                        Sync interval in cron format. Defaults to @hourly.  
+  -d, --dry-run         Dry run the syncronization
 ```
 
 ## NOTE
