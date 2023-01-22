@@ -1,5 +1,7 @@
 # Synchronize two folders
 
+![badge](https://img.shields.io/github/package-json/v/AndreGraca98/folder-sync?filename=version.json&label=folder-sync&logo=python&logoColor=yellow)
+
 Synchronize two folders: source and replica. Keep a full, identical copy of source folder at replica folder.
 
 ## Contents
@@ -7,21 +9,47 @@ Synchronize two folders: source and replica. Keep a full, identical copy of sour
 - [Synchronize two folders](#synchronize-two-folders)
   - [Contents](#contents)
   - [Requirements](#requirements)
+  - [Setup](#setup)
   - [Usage](#usage)
     - [1. Sync folders once](#1-sync-folders-once)
     - [2. Sync folders using a while loop](#2-sync-folders-using-a-while-loop)
     - [3. Sync folders using cronjobs](#3-sync-folders-using-cronjobs)
-  - [NOTE](#note)
+  - [Project requirements](#project-requirements)
+  - [TODO](#todo)
 
 ## Requirements
 
+- python>=3.9
+- [python-crontab](https://pypi.org/project/python-crontab/)
+
+## Setup
+
 ```bash
+# 1.
 conda create -n myenv python=3.9 -y
 conda activate myenv
-pip install python-crontab # https://pypi.org/project/python-crontab/
+
+# 2.1.
+# Clone repo
+git clone https://github.com/AndreGraca98/folder-sync.git
+pip install python-crontab
+python setup.py install
+
+# OR
+
+# 2.2.
+# Install package
+pip install git+https://github.com/AndreGraca98/folder-sync.git
+
+# 3.
+# If $HOME/bin/ is not in the $PATH add it in the ~/.bashrc and reload terminal
+printf "\n\n"PATH="\$HOME/bin:\$PATH\n\n\n" >> ~/.bashrc
+source ~/.profile
 ```
 
 ## Usage
+
+After setup it is possible to use this tool as a command instead of calling python. Use `sync-folders ...` from anywhere in the system instead of `python main.py`
 
 ```bash
 usage: main.py [-h] {cronjob,inf-loop,run-once} ...
@@ -102,7 +130,7 @@ optional arguments:
   -d, --dry-run         Dry run the syncronization
 ```
 
-## NOTE
+## Project requirements
 
 - Synchronization must be one-way: after the synchronization content of the
 replica folder should be modified to exactly match content of the source
@@ -118,3 +146,8 @@ synchronization
 well-known algorithms. For example, there is no point in implementing yet
 another function that calculates MD5 if you need it for the task – it is
 perfectly acceptable to use a third-party (or built-in) library
+
+## TODO
+
+ 1. [ ] something
+ 2. [ ] other thing
