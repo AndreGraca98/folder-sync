@@ -37,12 +37,14 @@ def remove(path: Union[str, Path]) -> None:
         except Exception as e:
             syncLogger.error(f"Could not remove directory: {path}\n{e}")
 
-    elif path.is_file() or path.is_symlink():
+        return
+
+    if path.is_file() or path.is_symlink():
         path.unlink()  # missing_ok=True
         syncLogger.info(f"Removed file: {path}")
+        return
 
-    else:
-        syncLogger.error(f"{path} is not a file, directory or symlink")
+    syncLogger.error(f"{path} is not a file, directory or symlink")
 
 
 def remove_paths(dst_dir: Union[str, Path], paths: Iterable[Union[str, Path]]) -> None:
@@ -72,16 +74,18 @@ def copy(src_path: Union[str, Path], dst_path: Union[str, Path]) -> None:
         except Exception as e:
             syncLogger.warn(f"{e}")
 
+        return
+
         # shutil.copytree(str(src_path), str(dst_path), symlinks=True,  ignore=shutil.ignore_patterns(''), dirs_exist_ok=True) # copies directory and all its contents
 
-    elif src_path.is_file() or src_path.is_symlink():
+    if src_path.is_file() or src_path.is_symlink():
         # If path is a symlink copy the link and not the contents
         # Use shutil.copy instead of shutil.copy2 to avoid copying the files metadata such as the created/modified time
         shutil.copy(str(src_path), str(dst_path), follow_symlinks=False)
         syncLogger.info(f"Copied file: {dst_path}")
+        return
 
-    else:
-        syncLogger.error(f"{src_path} is not a file, directory or symlink")
+    syncLogger.error(f"{src_path} is not a file, directory or symlink")
 
 
 def copy_paths(
@@ -108,7 +112,7 @@ class FolderSynchronizer:
     def __init__(self, src_dir: Union[str, Path], dst_dir: Union[str, Path]) -> None:
         self.src_dir = Path(src_dir).resolve()
         if not self.src_dir.is_dir():
-            syncLogger.error(f"{src_dir} is not a valid directory")
+            syncLogger.error(f"SYNC FAILED: {src_dir} is not a valid directory")
             exit(1)
 
         self.dst_dir = Path(dst_dir).resolve()

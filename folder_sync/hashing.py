@@ -17,6 +17,7 @@ def updt_hash_file(file: Union[str, Path], _hash: HASH) -> HASH:
     file = Path(file)
     if not Path(file).is_file():
         hashLogger.error(f"{file} is not a file")
+        return _hash
 
     _hash.update(file.name.encode())
 
@@ -31,6 +32,7 @@ def updt_hash_dir(directory: Union[str, Path], _hash: HASH) -> HASH:
     directory = Path(directory)
     if not directory.is_dir():
         hashLogger.error(f"{directory} is not a directory")
+        return _hash
 
     for path in sorted(directory.iterdir(), key=lambda p: str(p).lower()):
         if path.is_file():

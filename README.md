@@ -16,30 +16,26 @@ Synchronize two folders: source and replica. Keep a full, identical copy of sour
 ## Requirements
 
 ```bash
-
 conda create -n myenv python=3.9 -y
 conda activate myenv
-pip install python-crontab
-
+pip install python-crontab # https://pypi.org/project/python-crontab/
 ```
 
 ## Usage
 
 ```bash
-usage: main.py [-h] --src SRC --dst DST [--sync-interval SYNC_INTERVAL] [--log-path LOG_FILE] [--log-level LOG_LEVEL]
+usage: main.py [-h] {cronjob,inf-loop,run-once} ...
 
 Syncronize files between two directories
 
-optional arguments:
+positional arguments:
+  {cronjob,inf-loop,run-once}
+    cronjob             Syncronize files between two directories using a cronjob
+    inf-loop            Syncronize files between two directories using an infinite loop
+    run-once            Syncronize files between two directories
+
+options:
   -h, --help            show this help message and exit
-  --src SRC             Source directory
-  --dst DST             Destination directory
-  --sync-interval SYNC_INTERVAL
-                        Sync interval in seconds
-  --log-path LOG_FILE, --log-file LOG_FILE
-                        Log file path
-  --log-level LOG_LEVEL
-                        Log level
 ```
 
 ### 1. Sync folders once

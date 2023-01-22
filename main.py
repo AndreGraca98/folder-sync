@@ -4,7 +4,7 @@ import os
 import time
 from pathlib import Path
 
-from src import FolderSynchronizer, add_console_handler, set_log_cfg
+from folder_sync import FolderSynchronizer, add_console_handler, set_log_cfg
 
 rootLogger = logging.getLogger(__name__)
 
@@ -40,7 +40,12 @@ def get_parser() -> argparse.ArgumentParser:
             help="Log level",
         )
         parser.add_argument(
-            "-d", "--dry-run", action="store_true", help="Dry run the syncronization"
+            "-d",
+            "--dry",
+            "--dry-run",
+            action="store_true",
+            dest="dry_run",
+            help="Dry run the syncronization",
         )
 
         # parser.add_argument(
@@ -101,7 +106,7 @@ def main(args: argparse.Namespace):
 
 def run_once(args: argparse.Namespace) -> None:
 
-    set_log_cfg(args.log_file, args.log_level)
+    set_log_cfg(args.log_file, args.log_level.upper())
 
     add_console_handler(rootLogger)
 
@@ -110,7 +115,7 @@ def run_once(args: argparse.Namespace) -> None:
 
 def main_loop(args: argparse.Namespace) -> None:
 
-    set_log_cfg(args.log_file, args.log_level)
+    set_log_cfg(args.log_file, args.log_level.upper())
 
     add_console_handler(rootLogger)
 
@@ -138,7 +143,7 @@ def setup_cronjob(args: argparse.Namespace) -> None:
         exit(1)
 
     # TODO: use different python version ??
-    cmd = f"/usr/bin/python3 {__file__} run-once --src {args.src } --dst {args.dst} --log-file {Path(args.log_file).resolve()} --log-lvl {args.log_level}"
+    cmd = f"/usr/bin/python3 {__file__} run-once --src {args.src } --dst {args.dst} --log-file {Path(args.log_file).resolve()} --log-lvl {args.log_level.upper()} {'--dry-run' if args.dry_run else ''}"
 
     # Add cronjob
     cron = CronTab(user=os.getlogin())
@@ -146,7 +151,7 @@ def setup_cronjob(args: argparse.Namespace) -> None:
     job.setall(interval)
     cron.write()
 
-    rootLogger(f"Cronjob added: {job}")
+    rootLogger.info(f"Cronjob added: {job}")
 
 
 if __name__ == "__main__":
