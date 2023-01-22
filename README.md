@@ -1,6 +1,6 @@
 # Synchronize two folders
 
-![badge](https://img.shields.io/github/package-json/v/AndreGraca98/folder-sync?filename=version.json&label=folder-sync&logo=python&logoColor=yellow)
+![version_badge](https://img.shields.io/github/package-json/v/AndreGraca98/folder-sync?filename=folder_sync%2Fversion.json&label=folder-sync&logo=python&logoColor=yellow)
 
 Synchronize two folders: source and replica. Keep a full, identical copy of source folder at replica folder.
 
