@@ -20,7 +20,9 @@ def add_console_handler(logger):
 
 def set_log_cfg(log_file: Union[str, Path], log_level: str):
     # Create directory if it does not exist
-    Path(log_file).resolve().parent.mkdir(parents=True, exist_ok=True)
+    # Path(log_file).parts[~0]
+    log_file = Path(log_file).resolve()
+    log_file.parent.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
         filename=str(log_file),
