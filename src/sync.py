@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Union
 
+from .hashing import hash_dir, hash_path
 from .log import add_console_handler
 
 syncLogger = logging.getLogger(__name__)
@@ -129,22 +130,37 @@ class FolderSynchronizer:
         )
 
     def get_files_to_update_on_dst(self) -> None:
-
         files_to_update_on_dst = set()
-        for src_p, dst_p in zip(self.src_files, self.dst_files):
-            # If the modified time of the source file is newer than the destination file add it to the list of files to update
-            # FIXME: sometimes the time changes by 1 second, so the file is copied again
-            if get_mtime(self.dst_dir / dst_p) - get_mtime(self.src_dir / src_p) < 0:
-                files_to_update_on_dst.add(src_p)
+        for p in self.src_files & self.dst_files:
+            src_path = self.src_dir / p
+            dst_path = self.dst_dir / p
+
+            if src_path.is_symlink():
+                continue
+
+            src_is_newer = get_mtime(src_path) - get_mtime(dst_path) > 0
+            diff_hash = hash_path(src_path) != hash_path(dst_path)
+
+            syncLogger.debug(
+                f"path:{p} , src_is_newer:{src_is_newer} , srct:{get_mtime(src_path)} , dstt:{ get_mtime(dst_path)} , diff_hash:{diff_hash}"
+            )
+
+            if src_is_newer and diff_hash:
+                files_to_update_on_dst.add(p)
 
         return files_to_update_on_dst
 
     def sync(self) -> None:
         syncLogger.info(f"STARTING SYNC {self.src_dir} to {self.dst_dir}")
+
         remove_paths(self.dst_dir, self.files_to_remove_from_dst)
         copy_paths(self.src_dir, self.dst_dir, self.files_to_create_on_dst)
         copy_paths(self.src_dir, self.dst_dir, self.files_to_update_on_dst)
-        syncLogger.info(f"FINISHED SYNC {self.src_dir} to {self.dst_dir}")
+
+        if hash_dir(self.src_dir) == hash_dir(self.dst_dir):
+            syncLogger.info(f"SYNC SUCCESSFUL {self.src_dir} to {self.dst_dir}")
+        else:
+            syncLogger.error(f"SYNC FAILED {self.src_dir} to {self.dst_dir}")
 
 
 # ENDFILE
