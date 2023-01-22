@@ -20,24 +20,28 @@ def remove(path: Union[str, Path]) -> None:
         syncLogger.error(f"{path} does not exist")
         return
 
-    try:
-        if path.is_dir():
-            # shutil.rmtree(str(path))  # remove directory and all its contents
+    if path.is_dir():
+        # shutil.rmtree(str(path))  # remove directory and all its contents
+        try:
             path.rmdir()  # only works if directory is empty
             syncLogger.info(f"Removed directory: {path}")
-        elif path.is_file() or path.is_symlink():
-            path.unlink()
-            # path.unlink(missing_ok=True)
-            syncLogger.info(f"Removed file: {path}")
-        else:
-            syncLogger.error(f"{path} is not a file, directory or symlink")
+        except OSError:
+            syncLogger.warn(f"Directory {path} is not empty. Removing contents first")
+            # directory is not empty
+            for p in path.iterdir():
+                remove(p)  # recursively remove all files and directories in path
+            remove(path)  # remove dir itself
+            syncLogger.info(f"Removed directory: {path}")
 
-    except OSError:
-        # Something went wrong, path is a directory and is not empty
-        for p in path.iterdir():
-            remove(p)  # recursively remove all files and directories in path
-        remove(path)  # remove path itself
-        syncLogger.info(f"Removed directory: {path}")
+        except Exception as e:
+            syncLogger.error(f"Could not remove directory: {path}\n{e}")
+
+    elif path.is_file() or path.is_symlink():
+        path.unlink()  # missing_ok=True
+        syncLogger.info(f"Removed file: {path}")
+
+    else:
+        syncLogger.error(f"{path} is not a file, directory or symlink")
 
 
 def remove_paths(dst_dir: Union[str, Path], paths: Iterable[Union[str, Path]]) -> None:
@@ -54,26 +58,29 @@ def copy(src_path: Union[str, Path], dst_path: Union[str, Path]) -> None:
         syncLogger.error(f"{src_path} does not exist")
         return
 
-    try:
-        if src_path.is_dir():
-            try:
-                dst_path.mkdir()  # create directory parents=True, exist_ok=True
-                syncLogger.info(f"Created directory {dst_path}")
-            except FileExistsError:
-                syncLogger.info(f"Directory {dst_path} already exists")
+    if src_path == dst_path:
+        syncLogger.warn(f"Source path is the same as destination path: {src_path}")
+        return
 
-            # shutil.copytree(str(src_path), str(dst_path), symlinks=True,  ignore=shutil.ignore_patterns(''), dirs_exist_ok=True) # copies directory and all its contents
+    if src_path.is_dir():
+        try:
+            dst_path.mkdir()  # create directory :: parents=True, exist_ok=True
+            syncLogger.info(f"Created directory {dst_path}")
+        except FileExistsError:
+            syncLogger.warn(f"Directory {dst_path} already exists")
+        except Exception as e:
+            syncLogger.warn(f"{e}")
 
-        elif src_path.is_file() or src_path.is_symlink():
-            # If path is a symlink copy the link and not the contents
-            # Use shutil.copy instead of shutil.copy2 to avoid copying the files metadata such as the created/modified time
-            shutil.copy(str(src_path), str(dst_path), follow_symlinks=False)
-            syncLogger.info(f"Copied file: {dst_path}")
-        else:
-            syncLogger.error(f"{src_path} is not a file, directory or symlink")
+        # shutil.copytree(str(src_path), str(dst_path), symlinks=True,  ignore=shutil.ignore_patterns(''), dirs_exist_ok=True) # copies directory and all its contents
 
-    except shutil.SameFileError:
-        syncLogger.error(f"source path is the same as destination path: {src_path}")
+    elif src_path.is_file() or src_path.is_symlink():
+        # If path is a symlink copy the link and not the contents
+        # Use shutil.copy instead of shutil.copy2 to avoid copying the files metadata such as the created/modified time
+        shutil.copy(str(src_path), str(dst_path), follow_symlinks=False)
+        syncLogger.info(f"Copied file: {dst_path}")
+
+    else:
+        syncLogger.error(f"{src_path} is not a file, directory or symlink")
 
 
 def copy_paths(
@@ -81,6 +88,7 @@ def copy_paths(
     dst_dir: Union[str, Path],
     paths: Iterable[Union[str, Path]],
 ) -> None:
+    # TODO: sorting of paths
     for p in sorted(paths, key=lambda x: len(Path(x).parts), reverse=False):
         copy(Path(src_dir) / p, Path(dst_dir) / p)
 
@@ -100,9 +108,10 @@ class FolderSynchronizer:
         self.src_dir = Path(src_dir).resolve()
         if not self.src_dir.is_dir():
             syncLogger.error(f"{src_dir} is not a valid directory")
-            raise ValueError(f"{src_dir} is not a valid directory")
+            exit(1)
 
         self.dst_dir = Path(dst_dir).resolve()
+        self.dst_dir.mkdir(parents=True, exist_ok=True)
 
         # Match all files and folders except '.'
         self.src_files = set(
@@ -131,11 +140,11 @@ class FolderSynchronizer:
         return files_to_update_on_dst
 
     def sync(self) -> None:
-        syncLogger.info(f"START SYNCING {self.src_dir} to {self.dst_dir}")
+        syncLogger.info(f"STARTING SYNC {self.src_dir} to {self.dst_dir}")
         remove_paths(self.dst_dir, self.files_to_remove_from_dst)
         copy_paths(self.src_dir, self.dst_dir, self.files_to_create_on_dst)
         copy_paths(self.src_dir, self.dst_dir, self.files_to_update_on_dst)
-        syncLogger.info(f"FINISH SYNCING {self.src_dir} to {self.dst_dir}")
+        syncLogger.info(f"FINISHED SYNC {self.src_dir} to {self.dst_dir}")
 
 
 # ENDFILE
