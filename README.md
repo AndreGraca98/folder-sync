@@ -44,7 +44,7 @@ pip install git+https://github.com/AndreGraca98/folder-sync.git
 # 3.
 # If $HOME/bin/ is not in the $PATH add it in the ~/.bashrc and reload terminal
 printf "\n\n"PATH="\$HOME/bin:\$PATH\n\n\n" >> ~/.bashrc
-source ~/.profile
+source ~/.bashrc
 ```
 
 ## Usage
