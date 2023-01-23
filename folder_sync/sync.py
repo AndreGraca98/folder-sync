@@ -40,6 +40,7 @@ def remove(path: Union[str, Path]) -> None:
         return
 
     if path.is_file() or path.is_symlink():
+        # FIXME: error handling for missing files
         path.unlink()  # missing_ok=True
         syncLogger.info(f"Removed file: {path}")
         return
@@ -100,7 +101,7 @@ def copy_paths(
 
 def get_mtime(path: Union[str, Path]):
     """get modified time of path"""
-    # TODO: deal with different platforms
+    # TODO: deal with different OS platforms
     return os.stat(str(path)).st_mtime
 
 
@@ -116,6 +117,13 @@ class FolderSynchronizer:
             exit(1)
 
         self.dst_dir = Path(dst_dir).resolve()
+
+        if self.src_dir == self.dst_dir:
+            syncLogger.error(
+                f"SYNC FAILED: Source and destination directories are the same: {self.src_dir}"
+            )
+            exit(1)
+
         self.dst_dir.mkdir(parents=True, exist_ok=True)
 
         # Match all files and folders except '.'
@@ -142,7 +150,7 @@ class FolderSynchronizer:
             if src_path.is_symlink():
                 continue
 
-            src_is_newer = get_mtime(src_path) - get_mtime(dst_path) > 0
+            src_is_newer = get_mtime(src_path) > get_mtime(dst_path)
             diff_hash = hash_path(src_path) != hash_path(dst_path)
 
             syncLogger.debug(
@@ -150,6 +158,7 @@ class FolderSynchronizer:
             )
 
             if src_is_newer and diff_hash:
+                # If the file was changed but reverted to the initial state there is no need to copy
                 files_to_update_on_dst.add(p)
 
         return files_to_update_on_dst

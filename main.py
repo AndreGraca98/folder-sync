@@ -82,7 +82,7 @@ def get_parser() -> argparse.ArgumentParser:
         "-i",
         "--interval",
         "--sync-interval",
-        type=int,
+        type=float,
         default=60 * 60,
         dest="sync_interval",
         help="Sync interval in seconds. Defaults to 3600 seconds.",
@@ -133,7 +133,7 @@ def main_loop(args: argparse.Namespace) -> None:
     while True:
         try:
             main(args)
-            time.sleep(args.sync_interval)
+            time.sleep(int(args.sync_interval))
         except KeyboardInterrupt:
             rootLogger.info("Stoping periodic sync...")
             break
@@ -152,7 +152,7 @@ def setup_cronjob(args: argparse.Namespace) -> None:
         )
         exit(1)
 
-    # TODO: use different python version ??
+    # FIXME: what if i want to use different python version ??
     cmd = f"/usr/bin/python3 {__file__} run-once --src {args.src } --dst {args.dst} --log-file {Path(args.log_file).resolve()} --log-lvl {args.log_level.upper()} {'--dry-run' if args.dry_run else ''}"
 
     # Add cronjob
