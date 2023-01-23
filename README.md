@@ -49,7 +49,7 @@ source ~/.bashrc
 
 ## Usage
 
-After setup it is possible to use this tool as a command instead of calling python. Use `sync-folders ...` from anywhere in the system instead of `python main.py`
+❗IMPORTANT❗: After setup it is possible to use this tool as a command instead of calling python. Use `sync-folders ...` from anywhere in the system instead of `python main.py ...`
 
 ```bash
 usage: main.py [-h] {cronjob,inf-loop,run-once} ...
