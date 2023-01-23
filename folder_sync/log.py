@@ -20,8 +20,10 @@ def add_console_handler(logger):
 
 def set_log_cfg(log_file: Union[str, Path], log_level: str):
     # Create directory if it does not exist
-    # Path(log_file).parts[~0]
     log_file = Path(log_file).resolve()
+    if log_file.is_dir():
+        log_file = log_file / ".folders_sync.log"
+
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
@@ -30,6 +32,9 @@ def set_log_cfg(log_file: Union[str, Path], log_level: str):
         level=log_level,
         format=fmt,
     )
+
+    print(f"Logging to {log_file} ...")
+    # logging.getLogger().info(f"Logging to {log_file}")
 
 
 # ENDFILE

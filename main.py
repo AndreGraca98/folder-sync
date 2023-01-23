@@ -22,7 +22,11 @@ def get_parser() -> argparse.ArgumentParser:
             "--src", type=str, dest="src", required=True, help="Source directory"
         )
         parser.add_argument(
-            "--dst", type=str, dest="dst", required=True, help="Destination directory"
+            "--dst",
+            type=str,
+            dest="dst",
+            required=True,
+            help="Destination directory. Does not need to exist",
         )
 
         parser.add_argument(
@@ -30,8 +34,8 @@ def get_parser() -> argparse.ArgumentParser:
             "--log-file",
             type=str,
             dest="log_file",
-            default=str(Path(__file__).parent.resolve() / "sync.log"),
-            help="Log file path",
+            default=str(Path().home() / ".folders_sync.log"),
+            help="Log file or directory path. Defaults to /home/user/.folders_sync.log",
         )
         parser.add_argument(
             "--log-lvl",
@@ -39,7 +43,7 @@ def get_parser() -> argparse.ArgumentParser:
             type=str,
             dest="log_level",
             default="INFO",
-            help="Log level",
+            help="Log level. Defaults to INFO.",
         )
         parser.add_argument(
             "-d",
@@ -50,6 +54,7 @@ def get_parser() -> argparse.ArgumentParser:
             help="Dry run the syncronization",
         )
 
+        # TODO: implement exclude pattern
         # parser.add_argument(
         #     "--exclude", type=str, help="Exclude files matching this pattern"
         # )
@@ -59,6 +64,7 @@ def get_parser() -> argparse.ArgumentParser:
     )
     add_common_arguments(cronparser)
     cronparser.add_argument(
+        "-i",
         "--interval",
         "--sync-interval",
         type=str,
@@ -73,6 +79,7 @@ def get_parser() -> argparse.ArgumentParser:
     )
     add_common_arguments(infloop_parser)
     infloop_parser.add_argument(
+        "-i",
         "--interval",
         "--sync-interval",
         type=int,
@@ -102,6 +109,7 @@ def main(args: argparse.Namespace):
     rootLogger.debug(
         f"files_to_remove_from_dst: {synchronizer.files_to_remove_from_dst}"
     )
+
     if not args.dry_run:
         synchronizer.sync()
 

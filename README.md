@@ -20,7 +20,7 @@ Synchronize two folders: source and replica. Keep a full, identical copy of sour
 ## Requirements
 
 - python>=3.9
-- [python-crontab](https://pypi.org/project/python-crontab/)
+- [python-crontab](https://pypi.org/project/python-crontab/) ( if you want to use cronjobs instead of using the while cycle)
 
 ## Setup
 
