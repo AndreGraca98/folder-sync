@@ -27,7 +27,7 @@ class PostInstallCommand(install):
 
 setup(
     name="folder-sync",
-    version=json.load(open("version.json"))["version"],
+    version=json.load(open("folder_sync/version.json"))["version"],
     description="Synchronize two folders: source and replica. Keep a full, identical copy of source folder at replica folder.",
     author="André Graça",
     author_email="andrepgraca@gmail.com",
